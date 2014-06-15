@@ -16,7 +16,7 @@
     $('title').html(Util.formatTime(duration));
     duration -= 1000;
     if (duration > 1000) {
-      return setTimeout("countDown(" + duration + ")", 1000);
+      return setTimeout("countDown(" + duration + ", " + callback + ")", 1000);
     } else {
       return callback();
     }
@@ -38,7 +38,7 @@
         title: track.title,
         artwork_url: track.artwork_url
       };
-      countDown(track.duration, complete);
+      countDown(5 * 60 * 1000, complete);
       this.workloads.unshift(workload);
       localStorage['workloads'] = JSON.stringify(this.workloads);
       Workload = Parse.Object.extend("Workload");
@@ -60,14 +60,25 @@
   };
 
   complete = function() {
+    var $note;
+    $note = $('<div></div>').attr('id', 'note');
+    $note.html('24分おつかれさまでした！5分間交換ノートが見られます');
+    $('#contents').html($note);
     return countDown(track.duration, window.reload);
   };
 
   init = function() {
-    var $body, $start;
+    var $body, $item, $start, id, _i, _len, _ref;
     $body = $('body');
     $body.attr('align', 'center');
-    console.log('hoge');
+    $body.html('');
+    _ref = ['description', 'contents', 'footer'];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      id = _ref[_i];
+      $item = $('<div></div>');
+      $item.attr('id', id);
+      $body.append($item);
+    }
     $.get('/proxy?url=https://ruffnote.com/pandeiro245/245cloud/13475/download.json', function(data) {
       return $('#description').html(data.content);
     });

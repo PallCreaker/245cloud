@@ -12,7 +12,10 @@ window.countDown = (duration, callback) ->
   if duration > 1000
     setTimeout("countDown(#{duration}, #{callback})", 1000)
   else
-    callback()
+    if callback == 'reload'
+      location.reload()
+    else
+      callback()
 
 play = () ->
   url = "http://api.soundcloud.com/tracks/#{localStorage['sc_id']}.json?client_id=#{localStorage['client_id']}"
@@ -55,13 +58,23 @@ play = () ->
     )
 
 complete = () ->
-  countDown(track.duration, window.reload)
+  $note = $('<div></div>').attr('id', 'note')
+  $note.html('24分おつかれさまでした！5分間交換ノートが見られます')
+  $('#contents').html($note)
+
+
+  countDown(track.duration, 'reload')
 
 init = () ->
   $body = $('body')
   $body.attr('align', 'center')
 
-  console.log 'hoge'
+  $body.html('')
+  for id in ['description', 'contents', 'footer']
+    $item = $('<div></div>')
+    $item.attr('id', id)
+    $body.append($item)
+
   $.get('/proxy?url=https://ruffnote.com/pandeiro245/245cloud/13475/download.json', (data) ->
     $('#description').html(data.content)
   )
