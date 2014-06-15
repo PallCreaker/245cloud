@@ -18,7 +18,11 @@
     if (duration > 1000) {
       return setTimeout("countDown(" + duration + ", " + callback + ")", 1000);
     } else {
-      return callback();
+      if (callback === 'reload') {
+        return location.reload();
+      } else {
+        return callback();
+      }
     }
   };
 
@@ -38,7 +42,7 @@
         title: track.title,
         artwork_url: track.artwork_url
       };
-      countDown(5 * 60 * 1000, complete);
+      countDown(track.duration, complete);
       this.workloads.unshift(workload);
       localStorage['workloads'] = JSON.stringify(this.workloads);
       Workload = Parse.Object.extend("Workload");
@@ -64,7 +68,7 @@
     $note = $('<div></div>').attr('id', 'note');
     $note.html('24分おつかれさまでした！5分間交換ノートが見られます');
     $('#contents').html($note);
-    return countDown(track.duration, window.reload);
+    return countDown(5 * 60 * 1000, 'reload');
   };
 
   init = function() {

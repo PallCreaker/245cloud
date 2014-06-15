@@ -30,7 +30,7 @@ play = () ->
       title: track.title
       artwork_url: track.artwork_url
     }
-    countDown(5*60*1000, complete)
+    countDown(track.duration, complete)
 
     @workloads.unshift(workload)
     
@@ -62,8 +62,7 @@ complete = () ->
   $note.html('24分おつかれさまでした！5分間交換ノートが見られます')
   $('#contents').html($note)
 
-
-  countDown(track.duration, 'reload')
+  countDown(5*60*1000, 'reload')
 
 init = () ->
   $body = $('body')
