@@ -13,10 +13,17 @@
   });
 
   window.countDown = function(duration, callback) {
+    if (callback == null) {
+      callback = 'reload';
+    }
     $('title').html(Util.formatTime(duration));
     duration -= 1000;
     if (duration > 1000) {
-      return setTimeout("countDown(" + duration + ", " + callback + ")", 1000);
+      if (callback === 'reload') {
+        return setTimeout("countDown(" + duration + ")", 1000);
+      } else {
+        return setTimeout("countDown(" + duration + ", " + callback + ")", 1000);
+      }
     } else {
       if (callback === 'reload') {
         return location.reload();
@@ -42,12 +49,17 @@
         title: track.title,
         artwork_url: track.artwork_url
       };
-      countDown(track.duration, complete);
+      countDown(1, complete);
       this.workloads.unshift(workload);
       localStorage['workloads'] = JSON.stringify(this.workloads);
       Workload = Parse.Object.extend("Workload");
       workload = new Workload();
-      workload.save(workload).then(function(object) {});
+      workload.set('sc_id', localStorage['sc_id']);
+      workload.save(null, {
+        error: function(workload, error) {
+          return console.log(error);
+        }
+      });
       _ref = this.workloads;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -64,9 +76,34 @@
   };
 
   complete = function() {
-    var $note;
+    var $note, $recents, Comment, query;
     $note = $('<div></div>').attr('id', 'note');
     $note.html('24分おつかれさまでした！5分間交換ノートが見られます');
+    $recents = $('<div></div>').attr('class', 'recents');
+    $note.append($recents);
+    Comment = Parse.Object.extend("Comment");
+    query = new Parse.Query(Comment);
+    query.find({
+      success: function(comments) {
+        var $comment, c, _i, _len;
+        console.log(comments);
+        $comment = $('<input />').attr('id', 'comment');
+        $('#note').append($comment);
+        $('#comment').keypress(function(e) {
+          var body;
+          if (e.which === 13) {
+            body = $('#comment').val();
+            return window.comment(body);
+          }
+        });
+        for (_i = 0, _len = comments.length; _i < _len; _i++) {
+          c = comments[_i];
+          $recents.prepend(c.attributes.body);
+          $recents.prepend('<br />');
+        }
+        return $('#note').append($recents);
+      }
+    });
     $('#contents').html($note);
     return countDown(5 * 60 * 1000, 'reload');
   };
@@ -111,6 +148,22 @@
         return play();
       }
     });
+  };
+
+  window.comment = function(body) {
+    var $recents, Comment, comment;
+    Comment = Parse.Object.extend("Comment");
+    comment = new Comment();
+    comment.set('body', body);
+    comment.save(null, {
+      error: function(comment, error) {
+        return console.log(error);
+      }
+    });
+    $recents = $('#note .recents');
+    $recents.prepend(body);
+    $recents.prepend('<br />');
+    return $('#comment').val('');
   };
 
   Util = (function() {

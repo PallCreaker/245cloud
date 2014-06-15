@@ -6,11 +6,14 @@ localStorage['sc_id'] = location.hash.replace('#', '')
 $ ->
   init()
 
-window.countDown = (duration, callback) ->
+window.countDown = (duration, callback='reload') ->
   $('title').html(Util.formatTime(duration))
   duration -= 1000
   if duration > 1000
-    setTimeout("countDown(#{duration}, #{callback})", 1000)
+    if callback == 'reload'
+      setTimeout("countDown(#{duration})", 1000)
+    else
+      setTimeout("countDown(#{duration}, #{callback})", 1000)
   else
     if callback == 'reload'
       location.reload()
@@ -38,7 +41,10 @@ play = () ->
 
     Workload = Parse.Object.extend("Workload")
     workload = new Workload()
-    workload.save(workload).then((object) ->
+    workload.set('sc_id', localStorage['sc_id'])
+    workload.save(null, {error: (workload, error) ->
+      console.log error
+    }
     )
 
     for workload in @workloads
@@ -60,6 +66,30 @@ play = () ->
 complete = () ->
   $note = $('<div></div>').attr('id', 'note')
   $note.html('24分おつかれさまでした！5分間交換ノートが見られます')
+
+  $recents = $('<div></div>').attr('class', 'recents')
+  $note.append($recents)
+
+  Comment = Parse.Object.extend("Comment")
+  query = new Parse.Query(Comment)
+  query.find({
+    success: (comments) ->
+      console.log comments
+      $comment = $('<input />').attr('id', 'comment')
+      $('#note').append($comment)
+
+      $('#comment').keypress((e) ->
+        if e.which == 13 #enter
+          body = $('#comment').val()
+          window.comment(body)
+      )
+
+      for c in comments
+        $recents.prepend(c.attributes.body)
+        $recents.prepend('<br />')
+      $('#note').append($recents)
+  })
+
   $('#contents').html($note)
 
   countDown(5*60*1000, 'reload')
@@ -100,4 +130,20 @@ start = () ->
       localStorage['sc_id'] = sc_id
       play()
   })
+
+window.comment = (body) ->
+  Comment = Parse.Object.extend("Comment")
+  comment = new Comment()
+  comment.set('body', body)
+  comment.save(null, {error: (comment, error) ->
+    console.log error
+  }
+  )
+  $recents = $('#note .recents')
+  $recents.prepend(body)
+  $recents.prepend('<br />')
+
+  $('#comment').val('')
+
+
 
