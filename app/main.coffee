@@ -10,7 +10,7 @@ window.countDown = (duration, callback) ->
   $('title').html(Util.formatTime(duration))
   duration -= 1000
   if duration > 1000
-    setTimeout("countDown(#{duration})", 1000)
+    setTimeout("countDown(#{duration}, #{callback})", 1000)
   else
     callback()
 
@@ -27,7 +27,7 @@ play = () ->
       title: track.title
       artwork_url: track.artwork_url
     }
-    countDown(track.duration, complete)
+    countDown(5*60*1000, complete)
 
     @workloads.unshift(workload)
     
