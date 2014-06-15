@@ -69,11 +69,7 @@
     $body.attr('align', 'center');
     console.log('hoge');
     $.get('/proxy?url=https://ruffnote.com/pandeiro245/245cloud/13475/download.json', function(data) {
-      console.log('fuga');
-      console.log(data);
       return $('#description').html(data.content);
-    }).fail(function(data) {
-      return console.log(data);
     });
     $.get('/proxy?url=https://ruffnote.com/pandeiro245/245cloud/13477/download.json', function(data) {
       return $('#footer').html(data.content);
