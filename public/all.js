@@ -49,7 +49,7 @@
         title: track.title,
         artwork_url: track.artwork_url
       };
-      countDown(1, complete);
+      countDown(track.duration, complete);
       this.workloads.unshift(workload);
       localStorage['workloads'] = JSON.stringify(this.workloads);
       Workload = Parse.Object.extend("Workload");
