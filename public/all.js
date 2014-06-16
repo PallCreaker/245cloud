@@ -51,7 +51,11 @@
         title: track.title,
         artwork_url: track.artwork_url
       };
-      countDown(track.duration, complete);
+      if (localStorage['is_dev']) {
+        countDown(3000, complete);
+      } else {
+        countDown(track.duration, complete);
+      }
       this.workloads.unshift(workload);
       localStorage['workloads'] = JSON.stringify(this.workloads);
       Workload = Parse.Object.extend("Workload");
@@ -101,6 +105,9 @@
         });
         for (_i = 0, _len = comments.length; _i < _len; _i++) {
           c = comments[_i];
+          if (c.attributes.twitter_image) {
+            $recents.prepend("<img src='" + c.attributes.twitter_image + "' />");
+          }
           $recents.prepend(c.attributes.body);
           $recents.prepend('<br />');
         }
@@ -129,7 +136,14 @@
     $.get('/proxy?url=https://ruffnote.com/pandeiro245/245cloud/13477/download.json', function(data) {
       return $('#footer').html(data.content);
     });
-    $start = $('<input>').attr('id', 'start').attr('value', '24分集中する').attr('type', 'submit');
+    if (localStorage['twitter_id']) {
+      $start = $('<input>').attr('type', 'submit');
+      $start.attr('id', 'start').attr('value', '24分間集中する').attr('type', 'submit');
+    } else {
+      $start = $('<a></a>').html('Twitterログイン');
+      $start.attr('href', '/auth/twitter');
+      $start.attr('class', 'btn btn-default');
+    }
     $('#contents').html($start);
     return $('#start').click(function() {
       return start();
@@ -158,6 +172,15 @@
     Comment = Parse.Object.extend("Comment");
     comment = new Comment();
     comment.set('body', body);
+    if (localStorage['twitter_id']) {
+      comment.set('twitter_id', parseInt(localStorage['twitter_id']));
+    }
+    if (localStorage['twitter_nickname']) {
+      comment.set('twitter_nickname', localStorage['twitter_nickname']);
+    }
+    if (localStorage['twitter_image']) {
+      comment.set('twitter_image', localStorage['twitter_image']);
+    }
     comment.save(null, {
       error: function(comment, error) {
         return console.log(error);

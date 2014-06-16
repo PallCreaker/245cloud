@@ -32,7 +32,13 @@ play = () ->
       title: track.title
       artwork_url: track.artwork_url
     }
-    countDown(track.duration, complete)
+
+
+    if localStorage['is_dev']
+      countDown(3000, complete)
+    else
+      countDown(track.duration, complete)
+
 
     @workloads.unshift(workload)
     
@@ -85,6 +91,7 @@ complete = () ->
       )
 
       for c in comments
+        $recents.prepend("<img src='#{c.attributes.twitter_image}' />") if c.attributes.twitter_image
         $recents.prepend(c.attributes.body)
         $recents.prepend('<br />')
       $('#note').append($recents)
@@ -112,7 +119,13 @@ init = () ->
     $('#footer').html(data.content)
   )
   
-  $start = $('<input>').attr('id', 'start').attr('value', '24分集中する').attr('type', 'submit')
+  if localStorage['twitter_id']
+    $start = $('<input>').attr('type', 'submit')
+    $start.attr('id', 'start').attr('value', '24分間集中する').attr('type', 'submit')
+  else
+    $start = $('<a></a>').html('Twitterログイン')
+    $start.attr('href', '/auth/twitter')
+    $start.attr('class', 'btn btn-default')
   $('#contents').html($start)
   $('#start').click(() ->
     start()
@@ -135,11 +148,15 @@ window.comment = (body) ->
   Comment = Parse.Object.extend("Comment")
   comment = new Comment()
   comment.set('body', body)
+  comment.set('twitter_id', parseInt(localStorage['twitter_id'])) if localStorage['twitter_id']
+  comment.set('twitter_nickname', localStorage['twitter_nickname']) if localStorage['twitter_nickname']
+  comment.set('twitter_image', localStorage['twitter_image']) if localStorage['twitter_image']
   comment.save(null, {error: (comment, error) ->
     console.log error
   }
   )
   $recents = $('#note .recents')
+  $recents.prepend("<img src='#{localStorage['twitter_image']}' />") if localStorage['twitter_image']
   $recents.prepend(body)
   $recents.prepend('<br />')
 
