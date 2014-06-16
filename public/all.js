@@ -6,7 +6,9 @@
 
   localStorage['client_id'] = '2b9312964a1619d99082a76ad2d6d8c6';
 
-  localStorage['sc_id'] = location.hash.replace('#', '');
+  if (location.origin.match(/dev/)) {
+    localStorage['is_dev'] = true;
+  }
 
   $(function() {
     return init();
@@ -37,7 +39,7 @@
     var url;
     url = "http://api.soundcloud.com/tracks/" + localStorage['sc_id'] + ".json?client_id=" + localStorage['client_id'];
     return $.get(url, function(track) {
-      var Workload, artwork, workload, _i, _len, _ref, _results;
+      var Workload, ap, artwork, workload, _i, _len, _ref, _results;
       if (localStorage['workloads']) {
         this.workloads = JSON.parse(localStorage['workloads']);
       } else {
@@ -69,7 +71,8 @@
           artwork = "<img src=\"" + workload.artwork_url + "\" width=100px/>";
         }
         $('#workloads').append("<tr>\n  <td><a href=\"#" + workload.sc_id + "\">" + workload.title + "</a></td>\n  <td>" + artwork + "</td>\n  <td>" + (Util.formatTime(workload.started)) + "</td>\n</tr>");
-        _results.push($("#playing").html("<iframe width=\"100%\" height=\"400\" scrolling=\"no\" frameborder=\"no\" src=\"https://w.soundcloud.com/player/?visual=true&url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F" + localStorage['sc_id'] + "&show_artwork=true&client_id=" + localStorage['client_id'] + "&auto_play=true\"></iframe>"));
+        ap = localStorage['is_dev'] ? 'false' : 'true';
+        _results.push($("#playing").html("<iframe width=\"100%\" height=\"400\" scrolling=\"no\" frameborder=\"no\" src=\"https://w.soundcloud.com/player/?visual=true&url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F" + localStorage['sc_id'] + "&show_artwork=true&client_id=" + localStorage['client_id'] + "&auto_play=" + ap + "\"></iframe>"));
       }
       return _results;
     });
