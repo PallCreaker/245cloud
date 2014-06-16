@@ -60,7 +60,7 @@
       localStorage['workloads'] = JSON.stringify(this.workloads);
       Workload = Parse.Object.extend("Workload");
       workload = new Workload();
-      workload.set('sc_id', localStorage['sc_id']);
+      workload.set('sc_id', parseInt(localStorage['sc_id']));
       workload.save(null, {
         error: function(workload, error) {
           return console.log(error);
@@ -92,7 +92,7 @@
     query = new Parse.Query(Comment);
     query.find({
       success: function(comments) {
-        var $comment, c, _i, _len;
+        var $comment, c, hour, min, t, _i, _len;
         console.log(comments);
         $comment = $('<input />').attr('id', 'comment');
         $('#note').append($comment);
@@ -105,6 +105,10 @@
         });
         for (_i = 0, _len = comments.length; _i < _len; _i++) {
           c = comments[_i];
+          t = new Date(c.createdAt);
+          hour = t.getHours();
+          min = t.getMinutes();
+          $recents.prepend("" + hour + "時" + min + "分");
           if (c.attributes.twitter_image) {
             $recents.prepend("<img src='" + c.attributes.twitter_image + "' />");
           }
@@ -142,8 +146,8 @@
     } else {
       $start = $('<a></a>').html('Twitterログイン');
       $start.attr('href', '/auth/twitter');
-      $start.attr('class', 'btn btn-default');
     }
+    $start.attr('class', 'btn btn-default');
     $('#contents').html($start);
     return $('#start').click(function() {
       return start();
@@ -187,6 +191,9 @@
       }
     });
     $recents = $('#note .recents');
+    if (localStorage['twitter_image']) {
+      $recents.prepend("<img src='" + localStorage['twitter_image'] + "' />");
+    }
     $recents.prepend(body);
     $recents.prepend('<br />');
     return $('#comment').val('');

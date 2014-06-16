@@ -46,7 +46,7 @@ play = () ->
 
     Workload = Parse.Object.extend("Workload")
     workload = new Workload()
-    workload.set('sc_id', localStorage['sc_id'])
+    workload.set('sc_id', parseInt(localStorage['sc_id']))
     workload.save(null, {error: (workload, error) ->
       console.log error
     }
@@ -91,6 +91,10 @@ complete = () ->
       )
 
       for c in comments
+        t = new Date(c.createdAt)
+        hour = t.getHours()
+        min = t.getMinutes()
+        $recents.prepend("#{hour}時#{min}分")
         $recents.prepend("<img src='#{c.attributes.twitter_image}' />") if c.attributes.twitter_image
         $recents.prepend(c.attributes.body)
         $recents.prepend('<br />')
@@ -125,7 +129,7 @@ init = () ->
   else
     $start = $('<a></a>').html('Twitterログイン')
     $start.attr('href', '/auth/twitter')
-    $start.attr('class', 'btn btn-default')
+  $start.attr('class', 'btn btn-default')
   $('#contents').html($start)
   $('#start').click(() ->
     start()
