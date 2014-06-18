@@ -5,40 +5,23 @@ localStorage['is_dev'] = true if location.origin.match(/dev/)
 $ ->
   init()
 
-window.countDown = (duration, callback='reload') ->
-  $('title').html(Util.formatTime(duration))
-  duration -= 1000
-  if duration > 1000
-    if callback == 'reload'
-      setTimeout("countDown(#{duration})", 1000)
-    else
-      setTimeout("countDown(#{duration}, #{callback})", 1000)
-  else
-    if callback == 'reload'
-      location.reload()
-    else
-      callback()
-
 play = () ->
   localStorage['sc_id'] = location.hash.replace(/#/, '')
-  url = "http://api.soundcloud.com/tracks/#{localStorage['sc_id']}.json?client_id=#{localStorage['client_id']}"
-  $.get(url, (track) ->
-    Workload = Parse.Object.extend("Workload")
-    workload = new Workload()
-    workload.set('sc_id', parseInt(localStorage['sc_id']))
-    workload.set('twitter_id', parseInt(localStorage['twitter_id']))
-    workload.set('title', track.title)
-    workload.set('artwork_url', track.artwork_url)
+
+  Soundcloud.fetch(localStorage['sc_id'], localStorage['client_id'], (track) ->
+    params = {}
+    for key in ['sc_id', 'twitter_id']
+      params[key] = localStorage[key]
+    for key in ['title', 'artwork_url']
+      params[key] = track[key]
+    ParseParse.save("Workload", params)
+
     localStorage['artwork_url'] = track.artwork_url
 
-    workload.save(null, {error: (workload, error) ->
-      console.log error
-    }
-    )
     if localStorage['is_dev']
-      countDown(3000, complete)
+      Util.countDown(30000, complete)
     else
-      countDown(track.duration, complete)
+      Util.countDown(track.duration, complete)
 
     if false
       for workload in @workloads
@@ -49,17 +32,16 @@ play = () ->
           <tr>
             <td><a href=\"##{workload.sc_id}\">#{workload.title}</a></td>
             <td>#{artwork}</td>
-            <td>#{Util.formatTime(workload.started)}</td>
+            <td>#{Util.time(workload.started)}</td>
           </tr>
         """)
     ap = if localStorage['is_dev'] then 'false' else 'true'
     $("#playing").html("""
-<iframe width="100%" height="400" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?visual=true&url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F#{localStorage['sc_id']}&show_artwork=true&client_id=#{localStorage['client_id']}&auto_play=#{ap}"></iframe>
+    <iframe width="100%" height="400" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?visual=true&url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F#{localStorage['sc_id']}&show_artwork=true&client_id=#{localStorage['client_id']}&auto_play=#{ap}"></iframe>
     """)
-    )
+  )
 
 complete = () ->
-  localStorage['sc_id'] = null
   $note = $('<table></table').attr('id', 'note').addClass('table').attr('style', 'width: 500px; margin: 0 auto;')
   $note.html('24分おつかれさまでした！5分間交換ノートが見られます')
 
@@ -118,7 +100,7 @@ complete = () ->
               <tr>
                 <td><a href=\"##{track.id}\">#{track.title}</a></td>
                 <td>#{artwork}</td>
-                <td>#{Util.formatTime(track.duration)}</td>
+                <td>#{Util.time(track.duration)}</td>
               </tr>
             """)
         else
@@ -126,7 +108,7 @@ complete = () ->
       )
   )
 
-  countDown(5*60*1000, 'reload')
+  Util.countDown(5*60*1000, 'reload')
 
 init = () ->
   $body = $('body')
@@ -145,7 +127,7 @@ init = () ->
   $.get('/proxy?url=https://ruffnote.com/pandeiro245/245cloud/13477/download.json', (data) ->
     $('#footer').html(data.content)
   )
-  
+
   if localStorage['twitter_id']
     $start = $('<input>').attr('type', 'submit')
     $start.attr('id', 'start').attr('value', '24分間集中する！！').attr('type', 'submit')
@@ -172,19 +154,11 @@ start = () ->
   })
 
 window.comment = (body) ->
-  Comment = Parse.Object.extend("Comment")
-  comment = new Comment()
-  comment.set('body', body)
-  comment.set('twitter_id', parseInt(localStorage['twitter_id'])) if localStorage['twitter_id']
-  comment.set('twitter_nickname', localStorage['twitter_nickname']) if localStorage['twitter_nickname']
-  comment.set('twitter_image', localStorage['twitter_image']) if localStorage['twitter_image']
-  comment.set('sc_id', localStorage['sc_id']) if localStorage['sc_id']
-  comment.set('artwork_url', localStorage['artwork_url']) if localStorage['artwork_url']
+  params = {body: body}
+  for key in ['twitter_id', 'twitter_nickname', 'twitter_image', 'sc_id', 'artwork_url']
+    params[key] = localStorage[key]
+  ParseParse.save('Comment', params)
 
-  comment.save(null, {error: (comment, error) ->
-    console.log error
-  }
-  )
   $recents = $('#note .recents')
   $recents.prepend("<img src='#{localStorage['twitter_image']}' />") if localStorage['twitter_image']
   $recents.prepend(body)

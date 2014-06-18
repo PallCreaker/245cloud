@@ -13,59 +13,37 @@
     return init();
   });
 
-  window.countDown = function(duration, callback) {
-    if (callback == null) {
-      callback = 'reload';
-    }
-    $('title').html(Util.formatTime(duration));
-    duration -= 1000;
-    if (duration > 1000) {
-      if (callback === 'reload') {
-        return setTimeout("countDown(" + duration + ")", 1000);
-      } else {
-        return setTimeout("countDown(" + duration + ", " + callback + ")", 1000);
-      }
-    } else {
-      if (callback === 'reload') {
-        return location.reload();
-      } else {
-        return callback();
-      }
-    }
-  };
-
   play = function() {
-    var url;
     localStorage['sc_id'] = location.hash.replace(/#/, '');
-    url = "http://api.soundcloud.com/tracks/" + localStorage['sc_id'] + ".json?client_id=" + localStorage['client_id'];
-    return $.get(url, function(track) {
-      var Workload, ap, artwork, workload, _i, _len, _ref;
-      Workload = Parse.Object.extend("Workload");
-      workload = new Workload();
-      workload.set('sc_id', parseInt(localStorage['sc_id']));
-      workload.set('twitter_id', parseInt(localStorage['twitter_id']));
-      workload.set('title', track.title);
-      workload.set('artwork_url', track.artwork_url);
+    return Soundcloud.fetch(localStorage['sc_id'], localStorage['client_id'], function(track) {
+      var ap, artwork, key, params, workload, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
+      params = {};
+      _ref = ['sc_id', 'twitter_id'];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        key = _ref[_i];
+        params[key] = localStorage[key];
+      }
+      _ref1 = ['title', 'artwork_url'];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        key = _ref1[_j];
+        params[key] = track[key];
+      }
+      ParseParse.save("Workload", params);
       localStorage['artwork_url'] = track.artwork_url;
-      workload.save(null, {
-        error: function(workload, error) {
-          return console.log(error);
-        }
-      });
       if (localStorage['is_dev']) {
-        countDown(3000, complete);
+        Util.countDown(30000, complete);
       } else {
-        countDown(track.duration, complete);
+        Util.countDown(track.duration, complete);
       }
       if (false) {
-        _ref = this.workloads;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          workload = _ref[_i];
+        _ref2 = this.workloads;
+        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+          workload = _ref2[_k];
           artwork = '';
           if (workload.artwork_url) {
             artwork = "<img src=\"" + workload.artwork_url + "\" width=100px/>";
           }
-          $('#workloads').append("<tr>\n  <td><a href=\"#" + workload.sc_id + "\">" + workload.title + "</a></td>\n  <td>" + artwork + "</td>\n  <td>" + (Util.formatTime(workload.started)) + "</td>\n</tr>");
+          $('#workloads').append("<tr>\n  <td><a href=\"#" + workload.sc_id + "\">" + workload.title + "</a></td>\n  <td>" + artwork + "</td>\n  <td>" + (Util.time(workload.started)) + "</td>\n</tr>");
         }
       }
       ap = localStorage['is_dev'] ? 'false' : 'true';
@@ -75,7 +53,6 @@
 
   complete = function() {
     var $note, $recents, $track, $tracks, Comment, query;
-    localStorage['sc_id'] = null;
     $note = $('<table></table').attr('id', 'note').addClass('table').attr('style', 'width: 500px; margin: 0 auto;');
     $note.html('24分おつかれさまでした！5分間交換ノートが見られます');
     $recents = $('<div></div>').attr('class', 'recents');
@@ -134,7 +111,7 @@
               if (track.artwork_url) {
                 artwork = "<img src=\"" + track.artwork_url + "\" width=100px/>";
               }
-              _results.push($('#tracks').append("<tr>\n  <td><a href=\"#" + track.id + "\">" + track.title + "</a></td>\n  <td>" + artwork + "</td>\n  <td>" + (Util.formatTime(track.duration)) + "</td>\n</tr>"));
+              _results.push($('#tracks').append("<tr>\n  <td><a href=\"#" + track.id + "\">" + track.title + "</a></td>\n  <td>" + artwork + "</td>\n  <td>" + (Util.time(track.duration)) + "</td>\n</tr>"));
             }
             return _results;
           } else {
@@ -143,7 +120,7 @@
         });
       }
     });
-    return countDown(5 * 60 * 1000, 'reload');
+    return Util.countDown(5 * 60 * 1000, 'reload');
   };
 
   init = function() {
@@ -198,30 +175,16 @@
   };
 
   window.comment = function(body) {
-    var $recents, Comment, comment;
-    Comment = Parse.Object.extend("Comment");
-    comment = new Comment();
-    comment.set('body', body);
-    if (localStorage['twitter_id']) {
-      comment.set('twitter_id', parseInt(localStorage['twitter_id']));
+    var $recents, key, params, _i, _len, _ref;
+    params = {
+      body: body
+    };
+    _ref = ['twitter_id', 'twitter_nickname', 'twitter_image', 'sc_id', 'artwork_url'];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      key = _ref[_i];
+      params[key] = localStorage[key];
     }
-    if (localStorage['twitter_nickname']) {
-      comment.set('twitter_nickname', localStorage['twitter_nickname']);
-    }
-    if (localStorage['twitter_image']) {
-      comment.set('twitter_image', localStorage['twitter_image']);
-    }
-    if (localStorage['sc_id']) {
-      comment.set('sc_id', localStorage['sc_id']);
-    }
-    if (localStorage['artwork_url']) {
-      comment.set('artwork_url', localStorage['artwork_url']);
-    }
-    comment.save(null, {
-      error: function(comment, error) {
-        return console.log(error);
-      }
-    });
+    ParseParse.save('Comment', params);
     $recents = $('#note .recents');
     if (localStorage['twitter_image']) {
       $recents.prepend("<img src='" + localStorage['twitter_image'] + "' />");

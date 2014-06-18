@@ -1,5 +1,5 @@
 class Util
-  @formatTime: (mtime) ->
+  @time: (mtime) ->
     if mtime < 24 * 3600 * 1000
       time = parseInt(mtime/1000)
       min = parseInt(time/60)
@@ -15,5 +15,20 @@ class Util
 
   @zero: (i) ->
     if i < 10 then "0#{i}" else "#{i}"
+
+  @countDown: (duration, callback='reload') ->
+    $('title').html(Util.time(duration))
+    duration -= 1000
+    if duration > 1000
+      if callback == 'reload'
+        setTimeout("Util.countDown(#{duration})", 1000)
+      else
+        setTimeout("Util.countDown(#{duration}, #{callback})", 1000)
+    else
+      if callback == 'reload'
+        location.reload()
+      else
+        callback()
+
 
 window.Util = window.Util || Util

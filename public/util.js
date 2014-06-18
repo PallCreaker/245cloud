@@ -4,7 +4,7 @@
   Util = (function() {
     function Util() {}
 
-    Util.formatTime = function(mtime) {
+    Util.time = function(mtime) {
       var day, hour, min, month, sec, time;
       if (mtime < 24 * 3600 * 1000) {
         time = parseInt(mtime / 1000);
@@ -26,6 +26,27 @@
         return "0" + i;
       } else {
         return "" + i;
+      }
+    };
+
+    Util.countDown = function(duration, callback) {
+      if (callback == null) {
+        callback = 'reload';
+      }
+      $('title').html(Util.time(duration));
+      duration -= 1000;
+      if (duration > 1000) {
+        if (callback === 'reload') {
+          return setTimeout("Util.countDown(" + duration + ")", 1000);
+        } else {
+          return setTimeout("Util.countDown(" + duration + ", " + callback + ")", 1000);
+        }
+      } else {
+        if (callback === 'reload') {
+          return location.reload();
+        } else {
+          return callback();
+        }
       }
     };
 
