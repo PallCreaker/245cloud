@@ -40,33 +40,22 @@
     url = "http://api.soundcloud.com/tracks/" + localStorage['sc_id'] + ".json?client_id=" + localStorage['client_id'];
     return $.get(url, function(track) {
       var Workload, ap, artwork, workload, _i, _len, _ref, _results;
-      if (localStorage['workloads']) {
-        this.workloads = JSON.parse(localStorage['workloads']);
-      } else {
-        this.workloads = [];
-      }
-      workload = {
-        sc_id: localStorage['sc_id'],
-        twitter_id: localStorage['twitter_id'],
-        started: new Date,
-        title: track.title,
-        artwork_url: track.artwork_url
-      };
-      if (false) {
-        countDown(3000, complete);
-      } else {
-        countDown(track.duration, complete);
-      }
-      this.workloads.unshift(workload);
-      localStorage['workloads'] = JSON.stringify(this.workloads);
       Workload = Parse.Object.extend("Workload");
       workload = new Workload();
       workload.set('sc_id', parseInt(localStorage['sc_id']));
+      workload.set('twitter_id', parseInt(localStorage['twitter_id']));
+      workload.set('title', track.title);
+      workload.set('artwork_url', track.artwork_url);
       workload.save(null, {
         error: function(workload, error) {
           return console.log(error);
         }
       });
+      if (localStorage['is_dev']) {
+        countDown(3000, complete);
+      } else {
+        countDown(track.duration, complete);
+      }
       _ref = this.workloads;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {

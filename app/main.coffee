@@ -23,36 +23,21 @@ play = () ->
   localStorage['sc_id'] = location.hash.replace(/#/, '')
   url = "http://api.soundcloud.com/tracks/#{localStorage['sc_id']}.json?client_id=#{localStorage['client_id']}"
   $.get(url, (track) ->
-    if localStorage['workloads']
-      @workloads = JSON.parse(localStorage['workloads'])
-    else
-      @workloads = []
-    workload = {
-      sc_id: localStorage['sc_id']
-      twitter_id: localStorage['twitter_id']
-      started: new Date
-      title: track.title
-      artwork_url: track.artwork_url
-    }
-
-    #if localStorage['is_dev']
-    #if true
-    if false
-      countDown(3000, complete)
-    else
-      countDown(track.duration, complete)
-
-    @workloads.unshift(workload)
-    
-    localStorage['workloads'] = JSON.stringify(@workloads)
-
     Workload = Parse.Object.extend("Workload")
     workload = new Workload()
     workload.set('sc_id', parseInt(localStorage['sc_id']))
+    workload.set('twitter_id', parseInt(localStorage['twitter_id']))
+    workload.set('title', track.title)
+    workload.set('artwork_url', track.artwork_url)
+
     workload.save(null, {error: (workload, error) ->
       console.log error
     }
     )
+    if localStorage['is_dev']
+      countDown(3000, complete)
+    else
+      countDown(track.duration, complete)
 
     for workload in @workloads
       artwork = ''
