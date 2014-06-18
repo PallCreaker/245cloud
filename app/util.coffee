@@ -14,6 +14,6 @@ class Util
       "#{Util.zero(month)}/#{Util.zero(day)} #{Util.zero(hour)}:#{Util.zero(min)}"
 
   @zero: (i) ->
-    if i < 9 then "0#{i}" else "#{i}"
+    if i < 10 then "0#{i}" else "#{i}"
 
 window.Util = window.Util || Util

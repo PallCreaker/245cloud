@@ -22,7 +22,7 @@
     };
 
     Util.zero = function(i) {
-      if (i < 9) {
+      if (i < 10) {
         return "0" + i;
       } else {
         return "" + i;
