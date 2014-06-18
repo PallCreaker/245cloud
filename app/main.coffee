@@ -29,6 +29,7 @@ play = () ->
     workload.set('twitter_id', parseInt(localStorage['twitter_id']))
     workload.set('title', track.title)
     workload.set('artwork_url', track.artwork_url)
+    localStorage['artwork_url'] = track.artwork_url
 
     workload.save(null, {error: (workload, error) ->
       console.log error
@@ -39,17 +40,18 @@ play = () ->
     else
       countDown(track.duration, complete)
 
-    for workload in @workloads
-      artwork = ''
-      if workload.artwork_url
-        artwork = "<img src=\"#{workload.artwork_url}\" width=100px/>"
-      $('#workloads').append("""
-        <tr>
-          <td><a href=\"##{workload.sc_id}\">#{workload.title}</a></td>
-          <td>#{artwork}</td>
-          <td>#{Util.formatTime(workload.started)}</td>
-        </tr>
-      """)
+    if false
+      for workload in @workloads
+        artwork = ''
+        if workload.artwork_url
+          artwork = "<img src=\"#{workload.artwork_url}\" width=100px/>"
+        $('#workloads').append("""
+          <tr>
+            <td><a href=\"##{workload.sc_id}\">#{workload.title}</a></td>
+            <td>#{artwork}</td>
+            <td>#{Util.formatTime(workload.started)}</td>
+          </tr>
+        """)
       ap = if localStorage['is_dev'] then 'false' else 'true'
       $("#playing").html("""
   <iframe width="100%" height="400" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?visual=true&url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F#{localStorage['sc_id']}&show_artwork=true&client_id=#{localStorage['client_id']}&auto_play=#{ap}"></iframe>
@@ -176,6 +178,9 @@ window.comment = (body) ->
   comment.set('twitter_id', parseInt(localStorage['twitter_id'])) if localStorage['twitter_id']
   comment.set('twitter_nickname', localStorage['twitter_nickname']) if localStorage['twitter_nickname']
   comment.set('twitter_image', localStorage['twitter_image']) if localStorage['twitter_image']
+  comment.set('sc_id', localStorage['sc_id']) if localStorage['sc_id']
+  comment.set('artwork_url', localStorage['artwork_url']) if localStorage['artwork_url']
+
   comment.save(null, {error: (comment, error) ->
     console.log error
   }

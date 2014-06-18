@@ -39,13 +39,14 @@
     localStorage['sc_id'] = location.hash.replace(/#/, '');
     url = "http://api.soundcloud.com/tracks/" + localStorage['sc_id'] + ".json?client_id=" + localStorage['client_id'];
     return $.get(url, function(track) {
-      var Workload, ap, artwork, workload, _i, _len, _ref, _results;
+      var Workload, ap, artwork, workload, _i, _len, _ref;
       Workload = Parse.Object.extend("Workload");
       workload = new Workload();
       workload.set('sc_id', parseInt(localStorage['sc_id']));
       workload.set('twitter_id', parseInt(localStorage['twitter_id']));
       workload.set('title', track.title);
       workload.set('artwork_url', track.artwork_url);
+      localStorage['artwork_url'] = track.artwork_url;
       workload.save(null, {
         error: function(workload, error) {
           return console.log(error);
@@ -56,19 +57,19 @@
       } else {
         countDown(track.duration, complete);
       }
-      _ref = this.workloads;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        workload = _ref[_i];
-        artwork = '';
-        if (workload.artwork_url) {
-          artwork = "<img src=\"" + workload.artwork_url + "\" width=100px/>";
+      if (false) {
+        _ref = this.workloads;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          workload = _ref[_i];
+          artwork = '';
+          if (workload.artwork_url) {
+            artwork = "<img src=\"" + workload.artwork_url + "\" width=100px/>";
+          }
+          $('#workloads').append("<tr>\n  <td><a href=\"#" + workload.sc_id + "\">" + workload.title + "</a></td>\n  <td>" + artwork + "</td>\n  <td>" + (Util.formatTime(workload.started)) + "</td>\n</tr>");
         }
-        $('#workloads').append("<tr>\n  <td><a href=\"#" + workload.sc_id + "\">" + workload.title + "</a></td>\n  <td>" + artwork + "</td>\n  <td>" + (Util.formatTime(workload.started)) + "</td>\n</tr>");
         ap = localStorage['is_dev'] ? 'false' : 'true';
-        _results.push($("#playing").html("<iframe width=\"100%\" height=\"400\" scrolling=\"no\" frameborder=\"no\" src=\"https://w.soundcloud.com/player/?visual=true&url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F" + localStorage['sc_id'] + "&show_artwork=true&client_id=" + localStorage['client_id'] + "&auto_play=" + ap + "\"></iframe>"));
+        return $("#playing").html("<iframe width=\"100%\" height=\"400\" scrolling=\"no\" frameborder=\"no\" src=\"https://w.soundcloud.com/player/?visual=true&url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F" + localStorage['sc_id'] + "&show_artwork=true&client_id=" + localStorage['client_id'] + "&auto_play=" + ap + "\"></iframe>");
       }
-      return _results;
     });
   };
 
@@ -209,6 +210,12 @@
     }
     if (localStorage['twitter_image']) {
       comment.set('twitter_image', localStorage['twitter_image']);
+    }
+    if (localStorage['sc_id']) {
+      comment.set('sc_id', localStorage['sc_id']);
+    }
+    if (localStorage['artwork_url']) {
+      comment.set('artwork_url', localStorage['artwork_url']);
     }
     comment.save(null, {
       error: function(comment, error) {
