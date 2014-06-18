@@ -158,7 +158,7 @@ init = () ->
   
   if localStorage['twitter_id']
     $start = $('<input>').attr('type', 'submit')
-    $start.attr('id', 'start').attr('value', '24分間集中する').attr('type', 'submit')
+    $start.attr('id', 'start').attr('value', '24分間集中する！！').attr('type', 'submit')
   else
     $start = $('<a></a>').html('Twitterログイン')
     $start.attr('href', '/auth/twitter')
