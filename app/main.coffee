@@ -20,7 +20,7 @@ window.countDown = (duration, callback='reload') ->
       callback()
 
 play = () ->
-  location.hash = localStorage['sc_id']
+  localStorage['sc_id'] = location.hash.replace(/#/, '')
   url = "http://api.soundcloud.com/tracks/#{localStorage['sc_id']}.json?client_id=#{localStorage['client_id']}"
   $.get(url, (track) ->
     if localStorage['workloads']
@@ -29,12 +29,15 @@ play = () ->
       @workloads = []
     workload = {
       sc_id: localStorage['sc_id']
+      twitter_id: localStorage['twitter_id']
       started: new Date
       title: track.title
       artwork_url: track.artwork_url
     }
 
-    if localStorage['is_dev']
+    #if localStorage['is_dev']
+    #if true
+    if false
       countDown(3000, complete)
     else
       countDown(track.duration, complete)
@@ -177,7 +180,7 @@ start = () ->
     success: (musics) ->
       n = Math.floor(Math.random() * musics.length)
       sc_id = musics[n].attributes.sc_id
-      localStorage['sc_id'] = sc_id
+      location.hash = sc_id
       play()
   })
 
