@@ -20,6 +20,7 @@ window.countDown = (duration, callback='reload') ->
       callback()
 
 play = () ->
+  location.hash = localStorage['sc_id']
   url = "http://api.soundcloud.com/tracks/#{localStorage['sc_id']}.json?client_id=#{localStorage['client_id']}"
   $.get(url, (track) ->
     if localStorage['workloads']
@@ -33,12 +34,10 @@ play = () ->
       artwork_url: track.artwork_url
     }
 
-
     if localStorage['is_dev']
       countDown(3000, complete)
     else
       countDown(track.duration, complete)
-
 
     @workloads.unshift(workload)
     
@@ -70,6 +69,7 @@ play = () ->
     )
 
 complete = () ->
+  localStorage['sc_id'] = null
   $note = $('<table></table').attr('id', 'note').addClass('table').attr('style', 'width: 500px; margin: 0 auto;')
   $note.html('24分おつかれさまでした！5分間交換ノートが見られます')
 
@@ -105,6 +105,36 @@ complete = () ->
 
   $('#contents').attr(style: 'text-align:center;')
   $('#contents').html($note)
+
+  $track = $("<input />").attr('id', 'track')
+  $tracks = $("<div></div>").attr('id', 'tracks')
+
+  $('#contents').append("<hr /><h3>好きなパワーソングを探す</h3>")
+  $('#contents').append($track)
+  $('#contents').append($tracks)
+
+  $('#track').keypress((e) ->
+    if e.which == 13 #enter
+      q = $('#track').val()
+      url = "http://api.soundcloud.com/tracks.json?client_id=#{localStorage['client_id']}&q=#{q}&duration[from]=#{23*60*1000}&duration[to]=#{25*60*1000}"
+      $.get(url, (tracks) ->
+        if tracks[0]
+          for track in tracks
+            artwork = ''
+            if track.artwork_url
+              artwork = "<img src=\"#{track.artwork_url}\" width=100px/>"
+
+            $('#tracks').append("""
+              <tr>
+                <td><a href=\"##{track.id}\">#{track.title}</a></td>
+                <td>#{artwork}</td>
+                <td>#{Util.formatTime(track.duration)}</td>
+              </tr>
+            """)
+        else
+          alert "「#{q}」で24分前後の曲はまだ出てないようです...。他のキーワードで探してみてください！"
+      )
+  )
 
   countDown(5*60*1000, 'reload')
 

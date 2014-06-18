@@ -37,6 +37,7 @@
 
   play = function() {
     var url;
+    location.hash = localStorage['sc_id'];
     url = "http://api.soundcloud.com/tracks/" + localStorage['sc_id'] + ".json?client_id=" + localStorage['client_id'];
     return $.get(url, function(track) {
       var Workload, ap, artwork, workload, _i, _len, _ref, _results;
@@ -83,7 +84,7 @@
   };
 
   complete = function() {
-    var $note, $recents, Comment, query;
+    var $note, $recents, $track, $tracks, Comment, query;
     $note = $('<table></table').attr('id', 'note').addClass('table').attr('style', 'width: 500px; margin: 0 auto;');
     $note.html('24分おつかれさまでした！5分間交換ノートが見られます');
     $recents = $('<div></div>').attr('class', 'recents');
@@ -122,6 +123,35 @@
       style: 'text-align:center;'
     });
     $('#contents').html($note);
+    $track = $("<input />").attr('id', 'track');
+    $tracks = $("<div></div>").attr('id', 'tracks');
+    $('#contents').append("<hr /><h3>好きなパワーソングを探す</h3>");
+    $('#contents').append($track);
+    $('#contents').append($tracks);
+    $('#track').keypress(function(e) {
+      var q, url;
+      if (e.which === 13) {
+        q = $('#track').val();
+        url = "http://api.soundcloud.com/tracks.json?client_id=" + localStorage['client_id'] + "&q=" + q + "&duration[from]=" + (23 * 60 * 1000) + "&duration[to]=" + (25 * 60 * 1000);
+        return $.get(url, function(tracks) {
+          var artwork, track, _i, _len, _results;
+          if (tracks[0]) {
+            _results = [];
+            for (_i = 0, _len = tracks.length; _i < _len; _i++) {
+              track = tracks[_i];
+              artwork = '';
+              if (track.artwork_url) {
+                artwork = "<img src=\"" + track.artwork_url + "\" width=100px/>";
+              }
+              _results.push($('#tracks').append("<tr>\n  <td><a href=\"#" + track.id + "\">" + track.title + "</a></td>\n  <td>" + artwork + "</td>\n  <td>" + (Util.formatTime(track.duration)) + "</td>\n</tr>"));
+            }
+            return _results;
+          } else {
+            return alert("「" + q + "」で24分前後の曲はまだ出てないようです...。他のキーワードで探してみてください！");
+          }
+        });
+      }
+    });
     return countDown(5 * 60 * 1000, 'reload');
   };
 
