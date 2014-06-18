@@ -84,16 +84,16 @@
 
   complete = function() {
     var $note, $recents, Comment, query;
-    $note = $('<div></div>').attr('id', 'note');
+    $note = $('<table></table').attr('id', 'note').addClass('table').attr('style', 'width: 500px; margin: 0 auto;');
     $note.html('24分おつかれさまでした！5分間交換ノートが見られます');
     $recents = $('<div></div>').attr('class', 'recents');
     $note.append($recents);
     Comment = Parse.Object.extend("Comment");
     query = new Parse.Query(Comment);
+    query.descending("createdAt");
     query.find({
       success: function(comments) {
-        var $comment, c, hour, min, t, _i, _len;
-        console.log(comments);
+        var $comment, $img, c, hour, min, t, _i, _len;
         $comment = $('<input />').attr('id', 'comment');
         $('#note').append($comment);
         $('#comment').keypress(function(e) {
@@ -108,15 +108,18 @@
           t = new Date(c.createdAt);
           hour = t.getHours();
           min = t.getMinutes();
-          $recents.prepend("" + hour + "時" + min + "分");
-          if (c.attributes.twitter_image) {
-            $recents.prepend("<img src='" + c.attributes.twitter_image + "' />");
-          }
-          $recents.prepend(c.attributes.body);
-          $recents.prepend('<br />');
+          $recents.append("<tr>");
+          $img = c.attributes.twitter_image || "";
+          $recents.append("<td><img src='" + $img + "' /><td>");
+          $recents.append("<td>" + c.attributes.body + "</td>");
+          $recents.append("<td>" + hour + "時" + min + "分</td>");
+          $recents.append("</tr>");
         }
         return $('#note').append($recents);
       }
+    });
+    $('#contents').attr({
+      style: 'text-align:center;'
     });
     $('#contents').html($note);
     return countDown(5 * 60 * 1000, 'reload');
@@ -125,7 +128,9 @@
   init = function() {
     var $body, $item, $start, id, _i, _len, _ref;
     $body = $('body');
-    $body.attr('align', 'center');
+    $body.attr({
+      style: 'text-align:center;'
+    });
     $body.html('');
     _ref = ['description', 'contents', 'footer'];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {

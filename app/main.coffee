@@ -70,7 +70,7 @@ play = () ->
     )
 
 complete = () ->
-  $note = $('<div></div>').attr('id', 'note')
+  $note = $('<table></table').attr('id', 'note').addClass('table').attr('style', 'width: 500px; margin: 0 auto;')
   $note.html('24分おつかれさまでした！5分間交換ノートが見られます')
 
   $recents = $('<div></div>').attr('class', 'recents')
@@ -78,9 +78,9 @@ complete = () ->
 
   Comment = Parse.Object.extend("Comment")
   query = new Parse.Query(Comment)
+  query.descending("createdAt")
   query.find({
     success: (comments) ->
-      console.log comments
       $comment = $('<input />').attr('id', 'comment')
       $('#note').append($comment)
 
@@ -94,20 +94,23 @@ complete = () ->
         t = new Date(c.createdAt)
         hour = t.getHours()
         min = t.getMinutes()
-        $recents.prepend("#{hour}時#{min}分")
-        $recents.prepend("<img src='#{c.attributes.twitter_image}' />") if c.attributes.twitter_image
-        $recents.prepend(c.attributes.body)
-        $recents.prepend('<br />')
+        $recents.append("<tr>")
+        $img = c.attributes.twitter_image ||  ""
+        $recents.append("<td><img src='#{$img}' /><td>")
+        $recents.append("<td>#{c.attributes.body}</td>")
+        $recents.append("<td>#{hour}時#{min}分</td>")
+        $recents.append("</tr>")
       $('#note').append($recents)
   })
 
+  $('#contents').attr(style: 'text-align:center;')
   $('#contents').html($note)
 
   countDown(5*60*1000, 'reload')
 
 init = () ->
   $body = $('body')
-  $body.attr('align', 'center')
+  $body.attr(style: 'text-align:center;')
 
   $body.html('')
   for id in ['description', 'contents', 'footer']
