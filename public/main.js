@@ -31,7 +31,7 @@
       ParseParse.save("Workload", params);
       localStorage['artwork_url'] = track.artwork_url;
       if (localStorage['is_dev']) {
-        Util.countDown(30000, complete);
+        Util.countDown(3000, complete);
       } else {
         Util.countDown(track.duration, complete);
       }
@@ -137,12 +137,8 @@
       $item.attr('id', id);
       $body.append($item);
     }
-    $.get('/proxy?url=https://ruffnote.com/pandeiro245/245cloud/13475/download.json', function(data) {
-      return $('#description').html(data.content);
-    });
-    $.get('/proxy?url=https://ruffnote.com/pandeiro245/245cloud/13477/download.json', function(data) {
-      return $('#footer').html(data.content);
-    });
+    Ruffnote.fetch('/pandeiro245/245cloud/13475', 'description');
+    Ruffnote.fetch('/pandeiro245/245cloud/13477', 'footer');
     if (localStorage['twitter_id']) {
       $start = $('<input>').attr('type', 'submit');
       $start.attr('id', 'start').attr('value', '24分間集中する！！').attr('type', 'submit');
