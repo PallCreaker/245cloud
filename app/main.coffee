@@ -52,10 +52,10 @@ play = () ->
             <td>#{Util.formatTime(workload.started)}</td>
           </tr>
         """)
-      ap = if localStorage['is_dev'] then 'false' else 'true'
-      $("#playing").html("""
-  <iframe width="100%" height="400" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?visual=true&url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F#{localStorage['sc_id']}&show_artwork=true&client_id=#{localStorage['client_id']}&auto_play=#{ap}"></iframe>
-      """)
+    ap = if localStorage['is_dev'] then 'false' else 'true'
+    $("#playing").html("""
+<iframe width="100%" height="400" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?visual=true&url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F#{localStorage['sc_id']}&show_artwork=true&client_id=#{localStorage['client_id']}&auto_play=#{ap}"></iframe>
+    """)
     )
 
 complete = () ->
